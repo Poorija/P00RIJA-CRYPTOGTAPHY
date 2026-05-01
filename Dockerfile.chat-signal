@@ -1,0 +1,11 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+RUN npm install --omit=dev express@5.2.1 peer@1.0.2 web-push@3.6.7 ws@8.20.0
+
+COPY scripts/chat-signal-server.cjs ./scripts/chat-signal-server.cjs
+
+EXPOSE 9000 9001
+
+CMD ["node", "scripts/chat-signal-server.cjs"]

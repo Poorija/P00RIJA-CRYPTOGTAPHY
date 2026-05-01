@@ -1,0 +1,66 @@
+services:
+  poorija-cryptography:
+    image: poorija-crypto:v2.8
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: Poorija-Cryptography_App
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8585
+    depends_on:
+      - chat-signal
+    ports:
+      - "8585:8585"
+    restart: unless-stopped
+  chat-signal:
+    build:
+      context: .
+      dockerfile: Dockerfile.chat-signal
+    container_name: Poorija-Cryptography_ChatSignal
+    environment:
+      CHAT_TURN_URL: ${CHAT_TURN_URL:-turn:127.0.0.1:3478?transport=udp}
+      CHAT_TURN_USERNAME: ${TURN_USER:-poorija}
+      CHAT_TURN_CREDENTIAL: ${TURN_PASSWORD:-change-me}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:admin@poorija.local}
+      CHAT_PUSH_STORE_PATH: /data/push-subscriptions.json
+    expose:
+      - "9000"
+      - "9001"
+    volumes:
+      - chat_signal_data:/data
+    restart: unless-stopped
+  coturn:
+    image: coturn/coturn:4.6-alpine
+    container_name: Poorija-Cryptography_Coturn
+    profiles:
+      - turn
+    command:
+      - -n
+      - --log-file=stdout
+      - --listening-port=3478
+      - --tls-listening-port=5349
+      - --realm=${TURN_REALM:-poorija.local}
+      - --server-name=${TURN_SERVER_NAME:-poorija-coturn}
+      - --cert=/etc/coturn/certs/cert.pem
+      - --pkey=/etc/coturn/certs/key.pem
+      - --user=${TURN_USER:-poorija}:${TURN_PASSWORD:-change-me}
+      - --lt-cred-mech
+      - --fingerprint
+      - --no-cli
+      - --no-multicast-peers
+      - --min-port=49160
+      - --max-port=49200
+    ports:
+      - "3478:3478/tcp"
+      - "3478:3478/udp"
+      - "5349:5349/tcp"
+      - "49160-49200:49160-49200/udp"
+    volumes:
+      - ./certs:/etc/coturn/certs:ro
+    restart: unless-stopped
+
+volumes:
+  chat_signal_data:
