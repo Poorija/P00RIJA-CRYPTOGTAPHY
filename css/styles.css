@@ -6855,7 +6855,7 @@
             transform: none !important;
         }
 
-        #chatTimerPopover {
+        #chatTimerPopover:not(.hidden) {
             display: grid !important;
             grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
             gap: 0.45rem !important;
@@ -7233,3 +7233,27 @@
                 grid-template-columns: 1fr !important;
             }
         }
+
+
+/* Fixes for mobile PWA issues and timer popover visibility */
+
+
+html.pwa-standalone.mobile-browser-context #appHeader {
+    padding-top: calc(env(safe-area-inset-top) + 0.5rem) !important;
+}
+
+html.pwa-standalone.mobile-browser-context #appFooter {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem) !important;
+}
+
+/* Force timer popover to hide when hidden class is present */
+#chatTimerPopover.hidden,
+.chat-timer-popover.hidden {
+    display: none !important;
+}
+
+/* Ensure z-index is high enough to be clickable and visible when open */
+#chatTimerPopover:not(.hidden),
+.chat-timer-popover:not(.hidden) {
+    z-index: 2147483647 !important;
+}
