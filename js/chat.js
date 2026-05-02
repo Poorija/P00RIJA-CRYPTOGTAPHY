@@ -906,6 +906,8 @@
     const savedProfile = loadEncrypted(CHAT_PROFILE_STORAGE_KEY, null);
     if (savedProfile) {
       chatState.profile = { ...chatState.profile, ...savedProfile };
+      document.getElementById('chatProfileName').value = chatState.profile.name || '';
+      document.getElementById('chatServerUrl').value = chatState.profile.serverUrl || window.location.origin;
     } else {
       chatState.profile.serverUrl = window.location.origin;
       chatState.profile.name = language() === 'fa' ? 'کاربر P00RIJA' : 'P00RIJA User';
@@ -2940,6 +2942,12 @@
           }
         }
       }
+      chatState.localStream?.getTracks().forEach(track => {
+        try { track.stop(); } catch (e) {}
+      });
+      chatState.remoteStream?.getTracks().forEach(track => {
+        try { track.stop(); } catch (e) {}
+      });
       stopStream(chatState.localStream);
       stopStream(chatState.remoteStream);
       chatState.localStream = null;
