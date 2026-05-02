@@ -429,6 +429,7 @@
         .chat-primary-btn {
             background: linear-gradient(135deg, #0ea5e9, #06b6d4);
             color: white;
+            box-shadow: 0 4px 6px rgba(14, 165, 233, 0.2);
         }
 
         .chat-danger-soft-btn {
@@ -2653,7 +2654,7 @@
             position: absolute;
             inset-inline-end: 0;
             bottom: calc(100% + 0.55rem);
-            z-index: 22;
+            z-index: 10050 !important;
             min-width: 10rem;
             display: grid;
             gap: 0.25rem;
@@ -5687,7 +5688,7 @@
             }
 
             #chatFloatingCall .chat-call-control-row {
-                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+                display: flex !important; flex-wrap: wrap !important; justify-content: center !important;
                 grid-auto-rows: minmax(4rem, auto) !important;
             }
 
@@ -5868,7 +5869,7 @@
         }
 
         #chatFloatingCall .chat-floating-call-window[data-call-mode="voice"] .chat-call-control-row {
-            grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+            display: flex !important; flex-wrap: wrap !important; justify-content: center !important;
         }
 
         #chatFloatingCall .chat-floating-call-window[data-call-mode="video"] .chat-remote-stage,
@@ -5965,7 +5966,7 @@
             }
 
             #chatFloatingCall .chat-call-control-row {
-                grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+                display: flex !important; flex-wrap: wrap !important; justify-content: center !important;
                 grid-auto-rows: minmax(4rem, auto) !important;
                 gap: 0.5rem !important;
             }
@@ -6311,7 +6312,7 @@
             }
 
             #chatFloatingCall .chat-call-control-row {
-                grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+                display: flex !important; flex-wrap: wrap !important; justify-content: center !important;
                 align-content: end !important;
             }
 
@@ -6421,7 +6422,7 @@
             }
 
             #chatFloatingCall .chat-call-control-row {
-                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+                display: flex !important; flex-wrap: wrap !important; justify-content: center !important;
                 grid-auto-rows: minmax(3.8rem, auto) !important;
                 gap: 0.45rem !important;
             }
@@ -6521,7 +6522,7 @@
         #chatCallsList {
             flex: 1 1 auto !important;
             min-height: 10rem !important;
-            max-height: none !important;
+            max-height: calc(100vh - 250px) !important;
             overflow-y: auto !important;
             overscroll-behavior: contain !important;
             -webkit-overflow-scrolling: touch !important;
@@ -6700,7 +6701,7 @@
             }
 
             #chatFloatingCall .chat-call-control-row {
-                grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+                display: flex !important; flex-wrap: wrap !important; justify-content: center !important;
             }
         }
 
@@ -6714,7 +6715,7 @@
             }
 
             html.mobile-browser-context .chat-composer-bar {
-                padding: 0.4rem 0.4rem calc(0.4rem + env(safe-area-inset-bottom, 0px)) !important;
+                padding-bottom: calc(0.45rem + env(safe-area-inset-bottom, 0px)) !important;
             }
 
             html.mobile-browser-context .chat-composer-surface {
@@ -6731,7 +6732,7 @@
                 padding:
                     calc(env(safe-area-inset-top, 0px) + 0.45rem)
                     0.5rem
-                    calc(env(safe-area-inset-bottom, 0px) + 0.65rem)
+                    max(env(safe-area-inset-bottom), 0.75rem)
                     0.5rem !important;
             }
 
@@ -6745,7 +6746,7 @@
             }
 
             #chatFloatingCall .chat-call-control-row {
-                grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+                display: flex !important; flex-wrap: wrap !important; justify-content: center !important;
                 grid-auto-rows: minmax(3.7rem, auto) !important;
                 gap: 0.45rem !important;
             }
@@ -6972,9 +6973,14 @@
         }
 
         #chatFloatingCall .chat-call-control-row {
-            grid-template-columns: repeat(auto-fit, minmax(5.4rem, 1fr)) !important;
+            display: flex !important;
+            flex-wrap: wrap !important;
+            justify-content: center !important;
             align-self: end !important;
             gap: 0.55rem !important;
+        }
+        #chatFloatingCall .chat-call-control {
+            flex: 1 1 auto !important;
         }
 
         #chatFloatingCall .chat-call-control span {
@@ -6989,7 +6995,9 @@
         }
 
         #chatFloatingCall .chat-floating-call-window[data-call-mode="voice"] .chat-call-control-row {
-            grid-template-columns: repeat(auto-fit, minmax(5.25rem, 1fr)) !important;
+            display: flex !important;
+            flex-wrap: wrap !important;
+            justify-content: center !important;
         }
 
         @media (min-width: 768px) {
@@ -7030,7 +7038,7 @@
             }
 
             #chatFloatingCall .chat-call-control-row {
-                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+                display: flex !important; flex-wrap: wrap !important; justify-content: center !important;
                 grid-auto-rows: minmax(3.7rem, auto) !important;
             }
         }

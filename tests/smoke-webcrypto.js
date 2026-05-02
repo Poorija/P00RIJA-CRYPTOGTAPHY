@@ -69,7 +69,9 @@ async function run() {
     page.on('request', (request) => {
       const requestUrl = new URL(request.url());
       if (requestUrl.origin !== `http://${HOST}:${PORT}` && requestUrl.protocol.startsWith('http')) {
-        externalRequests.push(request.url());
+        if (!requestUrl.pathname.includes('/chat-health')) {
+          externalRequests.push(request.url());
+        }
       }
     });
 

@@ -68,6 +68,7 @@
     callSpeakerEnabled: false,
     callVideoEnabled: true,
     callFacingMode: 'user',
+      videoOrientation: 'landscape',
     callDisplayMode: 'fullscreen',
     callPrimaryVideo: 'remote',
     floatingCallPosition: {
@@ -390,19 +391,28 @@
   }
 
   function buildProfileDraft() {
+    const nameEl = document.getElementById('chatProfileName');
+    const serverUrlEl = document.getElementById('chatServerUrl');
+    const autoConnectEl = document.getElementById('chatAutoConnect');
+    const allowVideoEl = document.getElementById('chatAllowVideo');
+    const autoDiscoveryEl = document.getElementById('chatAutoDiscovery');
+    const turnUrlEl = document.getElementById('chatTurnUrl');
+    const turnUsernameEl = document.getElementById('chatTurnUsername');
+    const turnCredentialEl = document.getElementById('chatTurnCredential');
+
     return {
-      name: document.getElementById('chatProfileName')?.value.trim() || chatState.profile.name,
-      serverUrl: document.getElementById('chatServerUrl')?.value.trim() || chatState.profile.serverUrl || window.location.origin,
-      autoConnect: Boolean(document.getElementById('chatAutoConnect')?.checked),
-      allowVideo: Boolean(document.getElementById('chatAllowVideo')?.checked),
-      autoDiscovery: Boolean(document.getElementById('chatAutoDiscovery')?.checked),
+      name: (nameEl && nameEl.value.trim() !== '') ? nameEl.value.trim() : chatState.profile.name,
+      serverUrl: (serverUrlEl && serverUrlEl.value.trim() !== '') ? serverUrlEl.value.trim() : chatState.profile.serverUrl || window.location.origin,
+      autoConnect: autoConnectEl ? Boolean(autoConnectEl.checked) : chatState.profile.autoConnect,
+      allowVideo: allowVideoEl ? Boolean(allowVideoEl.checked) : chatState.profile.allowVideo,
+      autoDiscovery: autoDiscoveryEl ? Boolean(autoDiscoveryEl.checked) : chatState.profile.autoDiscovery,
       avatarData: chatState.profile.avatarData || '',
       presenceUrl: chatState.profile.presenceUrl || '',
       peerOrigin: chatState.profile.peerOrigin || '',
       stablePeerId: chatState.profile.stablePeerId || generateId('poorija-peer').replace(/[^a-zA-Z0-9_-]/g, '-'),
-      turnUrl: document.getElementById('chatTurnUrl')?.value.trim() || '',
-      turnUsername: document.getElementById('chatTurnUsername')?.value.trim() || '',
-      turnCredential: document.getElementById('chatTurnCredential')?.value || '',
+      turnUrl: turnUrlEl ? turnUrlEl.value.trim() : (chatState.profile.turnUrl || ''),
+      turnUsername: turnUsernameEl ? turnUsernameEl.value.trim() : (chatState.profile.turnUsername || ''),
+      turnCredential: turnCredentialEl ? turnCredentialEl.value : (chatState.profile.turnCredential || ''),
     };
   }
 
@@ -645,13 +655,6 @@
     const popover = document.getElementById('chatTimerPopover');
     const toggle = document.getElementById('chatTimerToggleBtn');
     if (!popover || !toggle || popover.classList.contains('hidden')) return;
-    if (document.documentElement.classList.contains('mobile-browser-context')) {
-      popover.style.left = '';
-      popover.style.top = '';
-      popover.style.right = '';
-      popover.style.bottom = '';
-      return;
-    }
     const toggleRect = toggle.getBoundingClientRect();
     const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
     const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
@@ -1034,6 +1037,7 @@
       chatMuteToggleBtn: t('بی‌صدا', 'Mute'),
       chatSwapVideoLayoutBtn: t('جابجایی', 'View'),
       chatFlipCameraBtn: t('چرخش', 'Flip'),
+      chatOrientationToggleBtn: t('جهت', 'Orientation'),
       chatVideoToggleBtn: t('ویدیو', 'Video'),
       chatEndCallControlBtn: t('پایان', 'End'),
     };
@@ -2027,6 +2031,12 @@
         return;
       }
 
+      if (message.type === 'relay' && message.payload?.type === 'call-rejected') {
+        notify(t('تماس رد شد', 'Call was rejected'), 'warning');
+        endCurrentCall();
+        return;
+      }
+
       if (message.type === 'relay' && message.payload?.type === 'space-sync' && message.payload?.space) {
         upsertSharedSpace(message.payload.space);
         renderPeers();
@@ -2560,8 +2570,8 @@
       video: wantsVideo
         ? {
           facingMode: { ideal: chatState.callFacingMode || 'user' },
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
+          width: { ideal: chatState.videoOrientation === 'portrait' ? 720 : 1280 },
+          height: { ideal: chatState.videoOrientation === 'portrait' ? 1280 : 720 },
         }
         : false,
     };
@@ -2654,13 +2664,14 @@
     setCallControlState('chatMuteToggleBtn', chatState.callMuted, !chatState.currentCall);
     setCallControlState('chatHoldToggleBtn', chatState.callHeld, !chatState.currentCall);
     setCallControlState('chatSpeakerToggleBtn', chatState.callSpeakerEnabled, !chatState.currentCall);
-    setCallControlState('chatVideoToggleBtn', !chatState.callVideoEnabled, !chatState.currentCall || chatState.currentCallMode !== 'video');
+    setCallControlState('chatVideoToggleBtn', !chatState.callVideoEnabled, !chatState.currentCall);
     setCallControlState('chatFlipCameraBtn', false, !chatState.currentCall || chatState.currentCallMode !== 'video');
     setCallControlState('chatSwapVideoLayoutBtn', chatState.callPrimaryVideo === 'local', !chatState.currentCall || chatState.currentCallMode !== 'video');
     setCallControlState('chatEndCallControlBtn', false, !chatState.currentCall);
-    document.getElementById('chatVideoToggleBtn')?.classList.toggle('hidden', chatState.currentCallMode !== 'video');
     document.getElementById('chatFlipCameraBtn')?.classList.toggle('hidden', chatState.currentCallMode !== 'video');
     document.getElementById('chatSwapVideoLayoutBtn')?.classList.toggle('hidden', chatState.currentCallMode !== 'video');
+    document.getElementById('chatOrientationToggleBtn')?.classList.toggle('hidden', chatState.currentCallMode !== 'video');
+    document.getElementById('chatVideoToggleBtn')?.classList.toggle('hidden', chatState.currentCallMode !== 'video');
     syncCallStageState();
   }
 
@@ -2739,6 +2750,8 @@
         mode: call.metadata?.mode || 'voice',
         status: 'missed',
       });
+      const callerPeer = findPeerRecordByPeerId(call.peer);
+      if (callerPeer) sendRelayEnvelope(callerPeer, { type: 'call-rejected', mode: call.metadata?.mode || 'voice' });
       call.close();
     }
     chatState.pendingIncomingCall = null;
@@ -2880,8 +2893,12 @@
     refreshCallControls();
   }
 
-  function toggleVideoCall() {
-    if (!chatState.localStream || chatState.currentCallMode !== 'video') return;
+  async function toggleVideoCall() {
+    if (!chatState.localStream) return;
+    if (chatState.currentCallMode === 'voice') {
+      // PeerJS lacks dynamic renegotiation without manual signaling, so we avoid adding tracks.
+      return;
+    }
     chatState.callVideoEnabled = !chatState.callVideoEnabled;
     chatState.localStream.getVideoTracks().forEach((track) => {
       track.enabled = chatState.callVideoEnabled && !chatState.callHeld;
@@ -2940,15 +2957,15 @@
           }
         }
       }
-      stopStream(chatState.localStream);
-      stopStream(chatState.remoteStream);
-      chatState.localStream = null;
-      chatState.remoteStream = null;
       clearMediaElement('chatLocalVideo');
       clearMediaElement('chatRemoteVideo');
       clearMediaElement('chatFloatingLocalVideo');
       clearMediaElement('chatFloatingRemoteVideo');
       clearMediaElement('chatIncomingPreviewVideo');
+      stopStream(chatState.localStream);
+      stopStream(chatState.remoteStream);
+      chatState.localStream = null;
+      chatState.remoteStream = null;
       chatState.pendingIncomingCall = null;
       chatState.pendingIncomingInvite = null;
       chatState.pendingIncomingAccept = false;
@@ -3235,6 +3252,27 @@
     document.getElementById('chatSpeakerToggleBtn')?.addEventListener('click', toggleSpeakerCall);
     document.getElementById('chatVideoToggleBtn')?.addEventListener('click', toggleVideoCall);
     document.getElementById('chatFlipCameraBtn')?.addEventListener('click', flipCameraCall);
+    document.getElementById('chatOrientationToggleBtn')?.addEventListener('click', async () => {
+      if (!chatState.currentCall || chatState.currentCallMode !== 'video' || !navigator.mediaDevices?.getUserMedia) return;
+      chatState.videoOrientation = chatState.videoOrientation === 'landscape' ? 'portrait' : 'landscape';
+      try {
+        const replacement = await requestCallMedia('video', false);
+        const nextTrack = replacement.getVideoTracks()[0];
+        if (!nextTrack) return;
+        const sender = chatState.currentCall.peerConnection?.getSenders?.().find((item) => item.track?.kind === 'video');
+        await sender?.replaceTrack(nextTrack);
+        const currentVideoTracks = chatState.localStream?.getVideoTracks?.() || [];
+        currentVideoTracks.forEach((track) => {
+          chatState.localStream?.removeTrack?.(track);
+          track.stop();
+        });
+        chatState.localStream?.addTrack(nextTrack);
+        attachLocalStream(chatState.localStream);
+        refreshCallControls();
+      } catch (error) {
+        console.error(error);
+      }
+    });
     document.getElementById('chatSwapVideoLayoutBtn')?.addEventListener('click', () => {
       chatState.callPrimaryVideo = chatState.callPrimaryVideo === 'remote' ? 'local' : 'remote';
       refreshCallControls();
