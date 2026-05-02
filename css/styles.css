@@ -5782,13 +5782,7 @@
             z-index: 90 !important;
         }
 
-        #chatTimerPopover {
-            position: fixed !important;
-            inset: auto !important;
-            width: min(15rem, calc(100vw - 1rem)) !important;
-            max-width: calc(100vw - 1rem) !important;
-            z-index: 2147482500 !important;
-        }
+        #chatTimerPopover { z-index: 10050 !important; position: fixed !important; }
 
         .chat-composer-bar {
             display: grid !important;
@@ -6572,10 +6566,7 @@
             max-height: 8.5rem !important;
         }
 
-        #chatTimerPopover {
-            position: fixed !important;
-            z-index: 160 !important;
-        }
+        #chatTimerPopover { z-index: 10050 !important; position: fixed !important; }
 
         html.mobile-browser-context #chatTimerPopover {
             inset: auto 0.45rem calc(env(safe-area-inset-bottom, 0px) + 4.75rem) 0.45rem !important;

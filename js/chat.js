@@ -655,6 +655,10 @@
     const popover = document.getElementById('chatTimerPopover');
     const toggle = document.getElementById('chatTimerToggleBtn');
     if (!popover || !toggle || popover.classList.contains('hidden')) return;
+
+    // Explicitly set very high z-index via inline styles just to be absolutely sure
+    popover.style.zIndex = '10050';
+
     const toggleRect = toggle.getBoundingClientRect();
     const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
     const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
